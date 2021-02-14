@@ -1,0 +1,14 @@
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0px 0px;
+    grid-template-areas:
+      "left left-mid right-mid right"
+      "left left-mid right-mid right"
+      "left left-mid right-mid right";
+  }
+  .left { grid-area: left; }
+  .left-mid { grid-area: left-mid; }
+  .right-mid { grid-area: right-mid; }
+  .right { grid-area: right; }
