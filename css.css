@@ -18,8 +18,8 @@
     text-align: right;
   }
 
-  img {
-    height: 200px;
+  .images img {
+    width: 500px;
   }
 
   .top {
