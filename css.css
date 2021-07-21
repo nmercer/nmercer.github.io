@@ -30,6 +30,6 @@
     margin-right: auto;
   }
   
-  .rss {
-    font-size: 8px !important;
+  .feed-item-title {
+    font-size: 8px;
   }
