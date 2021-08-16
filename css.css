@@ -28,9 +28,16 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
+    /* background-repeat: repeat-y; */
+    /* background-image: url("https://backend.roundshot.com/cams/19bbc62d60b23cf8e9fbdbddb275e7e8/medium"); */
   }
   
   .feed-item-title {
     font-size: 14px;
     text-align: left;
+  }
+
+  .right-top {
+    white-space:pre-wrap;
+    padding-left: 10px;
   }
