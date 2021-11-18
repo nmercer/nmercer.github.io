@@ -1,6 +1,6 @@
 console.log("start");
 
-
+// Sunrise Formatter
 function formatAMPM(date) {
     console.log(date);
 
@@ -14,6 +14,7 @@ function formatAMPM(date) {
     return strTime;
   }
 
+// Sunrise Jquery
 $.ajax({
     type: "GET",
     url: "https://api.sunrise-sunset.org/json?lat=48.407141&lng=-114.334622&formatted=0",
