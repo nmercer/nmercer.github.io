@@ -56,7 +56,8 @@ console.log("finished");
             + '<small style="color:#aaa;margin-left:8px">' + date + author + '</small>'
             + '</div>'
             + '<div style="font-size:0.8em;margin-bottom:8px">' + zones + '</div>'
-            + '<div style="font-size:0.85em;line-height:1.4">' + (p.bottom_line || '') + '</div>';
+            + '<div style="font-size:0.85em;line-height:1.4">' + (p.bottom_line || '') + '</div>'
+            + (p.hazard_discussion ? '<details style="margin-top:8px"><summary style="color:#aaa;font-size:0.8em;cursor:pointer">Hazard Discussion</summary><div style="font-size:0.82em;line-height:1.4;margin-top:6px">' + p.hazard_discussion + '</div></details>' : '');
         document.getElementById('fac-forecast').innerHTML = html;
     }
 
@@ -88,7 +89,6 @@ console.log("finished");
     fetch(url)
         .then(function (r) {
             if (r.status === 429) {
-                // Cache the failure so we don't keep hammering
                 try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), failed: true, data: cached && cached.data || null })); } catch (e) {}
                 if (cached && cached.data) { renderForecast(cached.data); } else { showFallback(); }
                 return null;
@@ -97,13 +97,23 @@ console.log("finished");
             return r.json();
         })
         .then(function (data) {
-            if (!data || !data.length) { showFallback(); return; }
-            // Sort by published_time desc, take most recent
+            if (!data) return;
+            if (!data.length) { showFallback(); return; }
             var p = data.sort(function (a, b) {
                 return (b.published_time || '').localeCompare(a.published_time || '');
             })[0];
-            try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: p })); } catch (e) {}
-            renderForecast(p);
+            // Fetch full product for hazard_discussion
+            fetch('https://api.avalanche.org/v2/public/product/' + p.id)
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (full) {
+                    if (full) p.hazard_discussion = full.hazard_discussion || '';
+                    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: p })); } catch (e) {}
+                    renderForecast(p);
+                })
+                .catch(function () {
+                    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: p })); } catch (e) {}
+                    renderForecast(p);
+                });
         })
         .catch(showFallback);
 })();
