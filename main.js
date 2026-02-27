@@ -37,7 +37,8 @@ console.log("finished");
     var dangerColors = { 1: '#78c800', 2: '#ffd800', 3: '#ff8400', 4: '#de1c00', 5: '#1a1a1a' };
     var dangerLabels = { 1: 'Low', 2: 'Moderate', 3: 'Considerable', 4: 'High', 5: 'Extreme' };
     var CACHE_KEY = 'fac_forecast';
-    var CACHE_TTL = 60 * 60 * 1000; // 1 hour
+    var CACHE_TTL = 60 * 60 * 1000;      // 1 hour for good data
+    var RETRY_TTL = 5 * 60 * 1000;       // 5 minutes before retrying after failure
 
     function renderForecast(p) {
         var rating = p.danger_rating;
@@ -64,40 +65,45 @@ console.log("finished");
             '<a href="https://www.flatheadavalanche.org/forecasts" target="_blank" style="color:#aaa">FAC Forecast &rarr;</a>';
     }
 
-    // Check cache first
-    try {
-        var cached = JSON.parse(localStorage.getItem(CACHE_KEY));
-        if (cached && (Date.now() - cached.ts) < CACHE_TTL) {
-            renderForecast(cached.data);
-            return;
-        }
-    } catch (e) {}
+    // Check cache — show stale data while retrying is blocked, skip fetch if fresh
+    var cached = null;
+    try { cached = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e) {}
 
-    function loadForecast(dateStr, triedYesterday) {
-        var url = 'https://api.avalanche.org/v2/public/products?avalanche_center_id=FAC&date_start=' + dateStr + '&date_end=' + dateStr;
-        fetch(url)
-            .then(function (r) {
-                if (!r.ok) { showFallback(); return null; }
-                return r.json();
-            })
-            .then(function (data) {
-                if (!data) return;
-                if (!data.length) {
-                    if (!triedYesterday) {
-                        var yesterday = new Date();
-                        yesterday.setDate(yesterday.getDate() - 1);
-                        loadForecast(yesterday.toISOString().split('T')[0], true);
-                    } else {
-                        showFallback();
-                    }
-                    return;
-                }
-                var p = data[0];
-                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: p })); } catch (e) {}
-                renderForecast(p);
-            })
-            .catch(showFallback);
+    if (cached && cached.data && (Date.now() - cached.ts) < CACHE_TTL) {
+        renderForecast(cached.data);
+        return;
+    }
+    if (cached && cached.failed && (Date.now() - cached.ts) < RETRY_TTL) {
+        // Rate limited recently — show stale data if we have it, else fallback
+        if (cached.data) { renderForecast(cached.data); } else { showFallback(); }
+        return;
     }
 
-    loadForecast(new Date().toISOString().split('T')[0], false);
+    // Use a 3-day window so timezone edge cases and late publishes don't miss
+    var end = new Date();
+    var start = new Date(); start.setDate(start.getDate() - 2);
+    var fmt = function (d) { return d.toISOString().split('T')[0]; };
+    var url = 'https://api.avalanche.org/v2/public/products?avalanche_center_id=FAC&date_start=' + fmt(start) + '&date_end=' + fmt(end);
+
+    fetch(url)
+        .then(function (r) {
+            if (r.status === 429) {
+                // Cache the failure so we don't keep hammering
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), failed: true, data: cached && cached.data || null })); } catch (e) {}
+                if (cached && cached.data) { renderForecast(cached.data); } else { showFallback(); }
+                return null;
+            }
+            if (!r.ok) { showFallback(); return null; }
+            return r.json();
+        })
+        .then(function (data) {
+            if (!data || !data.length) { showFallback(); return; }
+            // Sort by published_time desc, take most recent
+            var p = data.sort(function (a, b) {
+                return (b.published_time || '').localeCompare(a.published_time || '');
+            })[0];
+            try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: p })); } catch (e) {}
+            renderForecast(p);
+        })
+        .catch(showFallback);
 })();
