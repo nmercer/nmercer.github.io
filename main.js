@@ -57,7 +57,7 @@ console.log("finished");
             + '</div>'
             + '<div style="font-size:0.8em;margin-bottom:8px">' + zones + '</div>'
             + '<div style="font-size:0.85em;line-height:1.4">' + (p.bottom_line || '') + '</div>'
-            + (p.hazard_discussion ? '<details style="margin-top:8px"><summary style="color:#aaa;font-size:0.8em;cursor:pointer">Hazard Discussion</summary><div style="font-size:0.82em;line-height:1.4;margin-top:6px">' + p.hazard_discussion + '</div></details>' : '');
+            + (p.hazard_discussion ? '<div style="margin-top:8px;font-size:0.82em;line-height:1.4">' + p.hazard_discussion + '</div>' : '');
         document.getElementById('fac-forecast').innerHTML = html;
     }
 
