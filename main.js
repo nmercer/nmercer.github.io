@@ -31,3 +31,49 @@ $.ajax({
 });
 
 console.log("finished");
+
+// FAC Danger Rating Widget
+(function () {
+    var dangerColors = { 1: '#78c800', 2: '#ffd800', 3: '#ff8400', 4: '#de1c00', 5: '#1a1a1a' };
+    var dangerLabels = { 1: 'Low', 2: 'Moderate', 3: 'Considerable', 4: 'High', 5: 'Extreme' };
+
+    function loadForecast(dateStr) {
+        var url = 'https://api.avalanche.org/v2/public/products?avalanche_center_id=FAC&date_start=' + dateStr + '&date_end=' + dateStr;
+        fetch(url)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data || !data.length) {
+                    // Try yesterday if nothing published yet today
+                    if (dateStr === new Date().toISOString().split('T')[0]) {
+                        var yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        loadForecast(yesterday.toISOString().split('T')[0]);
+                    }
+                    return;
+                }
+                var p = data[0];
+                var rating = p.danger_rating;
+                var color = dangerColors[rating] || '#666';
+                var textColor = rating >= 4 ? '#fff' : '#000';
+                var label = dangerLabels[rating] || ('Level ' + rating);
+                var zones = (p.forecast_zone || []).map(function (z) {
+                    return '<a href="' + z.url + '" target="_blank" style="color:#aaa;text-decoration:none">' + z.name + '</a>';
+                }).join(' &bull; ');
+                var date = p.published_time ? new Date(p.published_time).toLocaleDateString() : '';
+                var author = p.author ? ' &mdash; ' + p.author : '';
+                var html = '<div style="margin-bottom:6px">'
+                    + '<span style="background:' + color + ';color:' + textColor + ';padding:3px 10px;border-radius:3px;font-weight:bold;font-size:1.1em">'
+                    + label + '</span>'
+                    + '<small style="color:#aaa;margin-left:8px">' + date + author + '</small>'
+                    + '</div>'
+                    + '<div style="font-size:0.8em;margin-bottom:8px">' + zones + '</div>'
+                    + '<div style="font-size:0.85em;line-height:1.4">' + (p.bottom_line || '') + '</div>';
+                document.getElementById('fac-forecast').innerHTML = html;
+            })
+            .catch(function () {
+                document.getElementById('fac-forecast').innerHTML = '';
+            });
+    }
+
+    loadForecast(new Date().toISOString().split('T')[0]);
+})();
