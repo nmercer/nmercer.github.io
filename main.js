@@ -36,7 +36,7 @@ console.log("finished");
 (function () {
     var dangerColors = { 1: '#78c800', 2: '#ffd800', 3: '#ff8400', 4: '#de1c00', 5: '#1a1a1a' };
     var dangerLabels = { 1: 'Low', 2: 'Moderate', 3: 'Considerable', 4: 'High', 5: 'Extreme' };
-    var CACHE_KEY = 'fac_forecast';
+    var CACHE_KEY = 'fac_forecast_v2';
     var CACHE_TTL = 60 * 60 * 1000;      // 1 hour for good data
     var RETRY_TTL = 5 * 60 * 1000;       // 5 minutes before retrying after failure
 
