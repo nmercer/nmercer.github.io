@@ -11,8 +11,6 @@
   function reposition() {
     const offset = window.innerHeight - vv.height - vv.offsetTop;
     nav.style.transform = 'translateY(' + (-offset) + 'px)';
-    nav.style.left = vv.offsetLeft + 'px';
-    nav.style.width = vv.width + 'px';
   }
 
   vv.addEventListener('resize', reposition);
