@@ -82,6 +82,10 @@ When checking for dead webcam links, use `curl -o /dev/null -s -w "%{http_code}"
 
 Each page hard-codes the active nav link with `class="bottom-nav-link active"`. No JS needed.
 
+## Git
+
+Do not add `Co-Authored-By` trailers to commit messages.
+
 ## Research & Internet Tasks
 
 When asked to research, find new resources, check/replace webcam URLs, or explore the internet for content relevant to this site, **read `claude.model.md` first**. It contains a detailed model of each page's goals, the regions and data types covered, known webcam URL patterns, and search terms to use when looking for replacements or new content.
