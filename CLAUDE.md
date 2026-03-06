@@ -84,7 +84,7 @@ Each page hard-codes the active nav link with `class="bottom-nav-link active"`. 
 
 ## Git
 
-Do not add `Co-Authored-By` trailers to commit messages.
+Do not add `Co-Authored-By` trailers to commit messages. Commit messages should be one short sentence of plain text only — no bullet points, no body.
 
 ## Research & Internet Tasks
 
