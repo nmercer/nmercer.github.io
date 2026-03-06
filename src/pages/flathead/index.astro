@@ -1,0 +1,57 @@
+---
+import Layout from '../../components/Layout.astro';
+import LinkList from '../../components/LinkList.astro';
+import WebcamGrid from '../../components/WebcamGrid.astro';
+import FacWidget from '../../components/FacWidget.astro';
+import SunriseSunset from '../../components/SunriseSunset.astro';
+import type { LinkEntry, WebcamEntry } from '../../types';
+
+const data = await import('../../data/flathead.json') as {
+  overviews: LinkEntry[];
+  whitefish_range: LinkEntry[];
+  swan_range: LinkEntry[];
+  flathead_gnp: LinkEntry[];
+  forums: LinkEntry[];
+  sled: LinkEntry[];
+  xc: LinkEntry[];
+  contact: LinkEntry[];
+  webcams: WebcamEntry[];
+};
+
+const sidebarCams = data.webcams.filter(c => c.sidebar);
+---
+<Layout title="Flathead Dashboard">
+  <img
+    src="https://backend.roundshot.com/cams/19bbc62d60b23cf8e9fbdbddb275e7e8/medium"
+    alt="Flathead webcam"
+    class="header-cam"
+    loading="lazy"
+  />
+  <div class="row g-0">
+    <div class="col-12 col-md-6 col-xl-3 px-2">
+      <LinkList title="Overviews" links={data.overviews} />
+      <LinkList title="Whitefish Range" links={data.whitefish_range} />
+      <LinkList title="Forums" links={data.forums} />
+      <LinkList title="Sled" links={data.sled} />
+      <LinkList links={data.contact} />
+    </div>
+    <div class="col-12 col-md-6 col-xl-3 px-2">
+      <LinkList title="Swan Range" links={data.swan_range} />
+      <LinkList title="Flathead & GNP" links={data.flathead_gnp} />
+      <LinkList title="XC" links={data.xc} />
+    </div>
+    <div class="col-12 col-md-6 col-xl-3 px-2">
+      <WebcamGrid webcams={data.webcams} />
+    </div>
+    <div class="col-12 col-md-6 col-xl-3 px-2">
+      <FacWidget />
+      <SunriseSunset />
+      {sidebarCams.map(cam => (
+        <div class="mb-3 position-relative">
+          <img src={cam.src} alt={cam.label} loading="lazy" class="webcam-img" />
+          <span class="webcam-label">{cam.group} — {cam.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</Layout>

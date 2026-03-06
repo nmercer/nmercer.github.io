@@ -1,0 +1,30 @@
+---
+import type { WebcamEntry } from '../types';
+
+interface Props {
+  webcams: WebcamEntry[];
+}
+
+const { webcams } = Astro.props;
+const liveCams = webcams.filter(c => !c.sidebar && !c.dead);
+const deadCams = webcams.filter(c => !c.sidebar && c.dead);
+---
+<div class="row row-cols-1 g-3">
+  {liveCams.map(cam => (
+    <div class="col position-relative">
+      <img src={cam.src} alt={cam.label} loading="lazy" class="webcam-img" />
+      <span class="webcam-label">{cam.group} — {cam.label}</span>
+    </div>
+  ))}
+  {deadCams.length > 0 && (
+    <div class="col">
+      <p class="text-secondary small mb-1 mt-2" style="font-style: italic;">Offline / may return</p>
+    </div>
+  )}
+  {deadCams.map(cam => (
+    <div class="col position-relative" style="opacity: 0.4;">
+      <img src={cam.src} alt={cam.label} loading="lazy" class="webcam-img" />
+      <span class="webcam-label">{cam.group} — {cam.label}</span>
+    </div>
+  ))}
+</div>

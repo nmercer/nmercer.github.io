@@ -4,46 +4,92 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Static GitHub Pages site — a personal dashboard aggregating avalanche forecasts, weather data, webcam feeds, and ski resort info for northwest Montana and surrounding regions. No build system, no frameworks, no local dependencies.
+Personal dashboard aggregating avalanche forecasts, weather data, webcam feeds, and ski resort info for northwest Montana, Idaho, and BC/Alberta Canada. Built with Astro 5 (static output), deployed to GitHub Pages at nmercer.github.io.
 
-## Serving Locally
+## Dev Commands
 
+```bash
+npm run dev      # localhost:4321 with hot reload
+npm run build    # output to dist/
+npm run preview  # serve dist/ locally
 ```
-python -m http.server
-```
 
-Open http://localhost:8000. There is no build step — edits to HTML/CSS/JS are immediate.
+Always run `npm run build` after making changes to verify no errors before committing.
 
 ## Deployment
 
-Push to `main` triggers automatic GitHub Pages deployment at nmercer.github.io.
+Push to `main` → GitHub Actions (`.github/workflows/deploy.yml`) → `peaceiris/actions-gh-pages@v3` → deploys `dist/` to `gh-pages` branch → live at nmercer.github.io.
 
 ## Architecture
 
-- **Pure static site**: HTML + CSS + JS, no templating or static site generator
-- **CDN dependencies**: Bootstrap 5.0.0-beta2, jQuery 3.6.0 (no local node_modules)
-- **Layout**: 4-column CSS Grid (`css.css`) with named areas: left, left-mid, right-mid, right
-- **Theming**: Bootstrap dark theme utilities (`.bg-dark`, `.text-light`)
+- **Framework**: Astro 5, `output: 'static'`, `site: 'https://nmercer.github.io'`
+- **CSS**: Bootstrap 5.3.x via `npm install bootstrap`, imported in `src/styles/global.css`
+- **Icons**: SVG sprite at `public/icons/sprite.svg`, referenced via `<use href="/icons/sprite.svg#NAME">`
 
 ### Pages
 
-| Path | Content |
-|------|---------|
-| `index.html` | Main page — Flathead avalanche, weather, webcams, sunrise/sunset |
-| `panhandle/index.html` | Idaho Panhandle avalanche resources |
-| `canada/index.html` | Avalanche Canada resources (Nelson, Golden, Fernie) |
+| Route | File | Content |
+|-------|------|---------|
+| `/` | `src/pages/index.astro` | 301 redirect → `/flathead/` |
+| `/flathead/` | `src/pages/flathead/index.astro` | Flathead/GNP dashboard (main page) |
+| `/canada/` | `src/pages/canada/index.astro` | BC/Alberta Canada dashboard |
+| `/idaho/` | `src/pages/idaho/index.astro` | Idaho dashboard |
 
-Each page is self-contained HTML with inline Bootstrap styling. Navigation between pages uses simple button links.
+### Components (`src/components/`)
 
-### JavaScript (`main.js`)
+| Component | Purpose |
+|-----------|---------|
+| `Layout.astro` | Wraps all pages — nav, global styles, slot |
+| `Nav.astro` | Bottom nav bar linking all three dashboards |
+| `LinkList.astro` | Renders a titled list of `LinkEntry` items with icons |
+| `WebcamGrid.astro` | Renders webcam images in a single-column grid; filters out `sidebar` cams, shows `dead` cams dimmed at the bottom |
+| `FacWidget.astro` | Fetches and displays Flathead Avalanche Center forecast |
+| `SunriseSunset.astro` | Fetches sunrise/sunset for Flathead area (48.41, -114.33) |
 
-Only used on the main `index.html`. Makes a single AJAX call to `api.sunrise-sunset.org` for sunrise/sunset times at coordinates 48.407141, -114.334622 (Flathead area) and renders results into the `.right-top` element.
+### Data Files (`src/data/`)
 
-## Conventions
+Each page has a corresponding JSON file driving all links and webcam images:
 
-- Links use inline SVG icons with colored circles (Bootstrap Icons style)
-- Webcam images use `.top` class for consistent sizing (200px height, centered)
-- New regional pages go in their own subdirectory with an `index.html`
+- `flathead.json` — sections: `overviews`, `whitefish_range`, `swan_range`, `flathead_gnp`, `forums`, `sled`, `xc`, `contact`, `webcams`
+- `canada.json` — sections: `overviews`, `nelson`, `golden`, `fernie`, `kimberley`, `revelstoke`, `webcams`
+- `idaho.json` — sections: `overviews`, `north_idaho`, `mccall`, `sun_valley`, `forums`, `sled`, `webcams`
+
+### Types (`src/types.ts`)
+
+```ts
+LinkEntry  { label, url, icon, type }
+WebcamEntry { label, src, group, dead?, sidebar? }
+```
+
+### Services (`src/services/`)
+
+- `fac.ts` — fetches FAC forecast with localStorage cache
+- `sunrise.ts` — fetches sunrise/sunset from api.sunrise-sunset.org
+
+## Layout (4 columns, Bootstrap grid)
+
+Each dashboard page uses `<div class="row g-0">` with four `col-12 col-md-6 col-xl-3` columns:
+
+| Col | Flathead | Canada | Idaho |
+|-----|---------|--------|-------|
+| 1 | Overviews, Whitefish Range, Forums, Sled, Contact | Avalanche Canada, Nelson, Golden | Avalanche Centers, North Idaho, Forums, Sled |
+| 2 | Swan Range, Flathead & GNP, XC | Fernie, Kimberley, Revelstoke | McCall, Sun Valley |
+| 3 | `WebcamGrid` (non-sidebar live cams, dead cams at bottom) | `WebcamGrid` | `WebcamGrid` |
+| 4 | FacWidget, SunriseSunset, sidebar cams | Teleport player, sidebar cams | (empty) |
+
+## Webcam Conventions
+
+`WebcamEntry` supports two optional flags in the JSON:
+
+- **`"sidebar": true`** — cam is excluded from `WebcamGrid` (col 3) and instead rendered inline in col 4 of the page
+- **`"dead": true`** — cam is shown at the bottom of `WebcamGrid` at 40% opacity under an "Offline / may return" label; keep these entries — they sometimes come back
+
+When checking for dead webcam links, use `curl -o /dev/null -s -w "%{http_code}"` — treat 403/404/000 as dead.
+
+## Link Color Conventions
+
+- Forecast links: `#8142f5` (`link-forecast`)
+- Weather station / SNOTEL: `#149414` (`link-station`)
 
 ## Research & Internet Tasks
 

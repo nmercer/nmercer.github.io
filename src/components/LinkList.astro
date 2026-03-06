@@ -1,0 +1,38 @@
+---
+import type { LinkEntry } from '../types';
+
+interface Props {
+  title?: string;
+  links: LinkEntry[];
+}
+
+const { title, links } = Astro.props;
+
+function colorClass(type: string): string {
+  const map: Record<string, string> = {
+    forecast: 'link-forecast',
+    'weather-station': 'link-station',
+    snotel: 'link-warning',
+    weather: 'link-station',
+    info: 'link-info',
+    wunderground: 'link-wunderground',
+    forum: '',
+    'webcam-link': 'link-cam',
+    map: 'link-station',
+    contact: 'link-station',
+  };
+  return map[type] ?? '';
+}
+---
+{title && <h3>{title}</h3>}
+<ul class="list-unstyled mb-0">
+  {links.map(link => (
+    <li class="mb-2">
+      <a href={link.url} target="_blank" rel="noopener noreferrer" class={colorClass(link.type)}>
+        <svg width="16" height="16" fill="currentColor" class="me-1" aria-hidden="true">
+          <use href={`/icons/sprite.svg#${link.icon}`} />
+        </svg>{link.label}
+      </a>
+    </li>
+  ))}
+</ul>

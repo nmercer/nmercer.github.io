@@ -1,0 +1,8 @@
+---
+const pathname = Astro.url.pathname;
+---
+<nav class="bottom-nav border-top border-secondary">
+  <a class={`bottom-nav-link${pathname.startsWith('/flathead') ? ' active' : ''}`} href="/flathead/">🇺🇸 Flathead</a>
+  <a class={`bottom-nav-link${pathname.startsWith('/canada') ? ' active' : ''}`} href="/canada/">🇨🇦 Canada</a>
+  <a class={`bottom-nav-link${pathname.startsWith('/idaho') ? ' active' : ''}`} href="/idaho/">🇺🇸 Idaho</a>
+</nav>

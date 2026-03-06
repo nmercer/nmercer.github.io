@@ -1,20 +1,47 @@
 # nmercer.github.io
-https://twitter.com/ecmwf/status/1485935815343718402?s=21
 
-https://www.ncdc.noaa.gov/cdo-web/
+Personal dashboard aggregating avalanche forecasts, weather data, webcam feeds, and ski resort info for northwest Montana and surrounding regions.
 
+## Prerequisites
 
-https://www.ncdc.noaa.gov/cdo-web/webservices/v2#stations
+- Node.js ≥ 18
 
+## Install
 
-https://developers.synopticdata.com/mesonet/
+```bash
+npm install
+```
 
+## Dev
 
-https://api.mesowest.net/v2/stations/timeseries?stid=SPRMT&recent=5760&obtimezone=local&complete=1&hfmetars=0&token=d8c6aee36a994f90857925cea26934be
+```bash
+npm run dev
+```
 
+Opens at http://localhost:4321 with hot reload.
 
-Base Lift Examples, grab via JS:
-https://skiwhitefish.com/inbound/5E0A1D2PAGABC9A/2021-12-15/pic_001/16.29.27[R][0@0][0].jpg
-https://skiwhitefish.com/inbound/5E0A1D2PAGABC9A/2021-12-15/pic_001/16.39.27[R][0@0][0].jpg
-https://skiwhitefish.com/inbound/5E0A1D2PAGABC9A/2021-12-15/pic_001/16.44.27[R][0@0][0].jpg
-https://skiwhitefish.com/inbound/5E0A1D2PAGABC9A/2021-12-15/pic_001/17.04.27[R][0@0][0].jpg
+## Build
+
+```bash
+npm run build
+```
+
+Output goes to `dist/`.
+
+## Preview
+
+```bash
+npm run preview
+```
+
+Serves the `dist/` output locally.
+
+## Deploy
+
+Push to `main` triggers GitHub Actions → builds → deploys `dist/` to the `gh-pages` branch → served at nmercer.github.io.
+
+In repo Settings → Pages: set source branch to `gh-pages`.
+
+## Env vars
+
+Copy `.env.example` to `.env` and adjust if needed (defaults work for the Flathead area).

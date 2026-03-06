@@ -1,0 +1,70 @@
+---
+---
+<div id="fac-forecast" style="min-height:2em">Loading forecast…</div>
+
+<script>
+import { fetchLatestForecast } from '../services/fac';
+
+const dangerColors: Record<number, string> = {
+  1: '#78c800',
+  2: '#ffd800',
+  3: '#ff8400',
+  4: '#de1c00',
+  5: '#1a1a1a',
+};
+const dangerLabels: Record<number, string> = {
+  1: 'Low',
+  2: 'Moderate',
+  3: 'Considerable',
+  4: 'High',
+  5: 'Extreme',
+};
+
+function renderForecast(p: {
+  danger_rating: number;
+  published_time?: string;
+  author?: string;
+  forecast_zone?: { name: string; url: string }[];
+  bottom_line?: string;
+  hazard_discussion?: string;
+}): void {
+  const rating = p.danger_rating;
+  const color = dangerColors[rating] || '#666';
+  const textColor = rating >= 4 ? '#fff' : '#000';
+  const label = dangerLabels[rating] || ('Level ' + rating);
+  const zones = (p.forecast_zone || [])
+    .map(z => `<a href="${z.url}" target="_blank" style="color:#aaa;text-decoration:none">${z.name}</a>`)
+    .join(' &bull; ');
+  const date = p.published_time ? new Date(p.published_time).toLocaleDateString() : '';
+  const author = p.author ? ' &mdash; ' + p.author : '';
+
+  const html =
+    '<div style="margin-bottom:6px">' +
+    `<span style="background:${color};color:${textColor};padding:3px 10px;border-radius:3px;font-weight:bold;font-size:1.1em">${label}</span>` +
+    `<small style="color:#aaa;margin-left:8px">${date}${author}</small>` +
+    '</div>' +
+    `<div style="font-size:0.8em;margin-bottom:8px">${zones}</div>` +
+    `<div style="font-size:0.85em;line-height:1.4">${p.bottom_line || ''}</div>` +
+    (p.hazard_discussion
+      ? `<div style="margin-top:8px;font-size:0.82em;line-height:1.4">${p.hazard_discussion}</div>`
+      : '');
+
+  const el = document.getElementById('fac-forecast');
+  if (el) el.innerHTML = html;
+}
+
+function showFallback(): void {
+  const el = document.getElementById('fac-forecast');
+  if (el) {
+    el.innerHTML =
+      '<a href="https://www.flatheadavalanche.org/forecasts" target="_blank" style="color:#aaa">FAC Forecast &rarr;</a>';
+  }
+}
+
+fetchLatestForecast('FAC')
+  .then(p => {
+    if (p) renderForecast(p);
+    else showFallback();
+  })
+  .catch(showFallback);
+</script>

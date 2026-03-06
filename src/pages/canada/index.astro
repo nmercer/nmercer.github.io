@@ -1,0 +1,51 @@
+---
+import Layout from '../../components/Layout.astro';
+import LinkList from '../../components/LinkList.astro';
+import WebcamGrid from '../../components/WebcamGrid.astro';
+import type { LinkEntry, WebcamEntry } from '../../types';
+
+const data = await import('../../data/canada.json') as {
+  overviews: LinkEntry[];
+  nelson: LinkEntry[];
+  golden: LinkEntry[];
+  fernie: LinkEntry[];
+  kimberley: LinkEntry[];
+  revelstoke: LinkEntry[];
+  webcams: WebcamEntry[];
+};
+
+const sidebarCams = data.webcams.filter(c => c.sidebar);
+---
+<Layout title="Canada Dashboard">
+  <img
+    src="https://backend.roundshot.com/cams/7a0b7f7cb7398f6f9a55fd5340e453b0/medium"
+    alt="Canada webcam"
+    class="header-cam"
+    loading="lazy"
+  />
+  <div class="row g-0">
+    <div class="col-12 col-md-6 col-xl-3 px-2">
+      <LinkList title="Avalanche Canada" links={data.overviews} />
+      <LinkList title="Nelson" links={data.nelson} />
+      <LinkList title="Golden" links={data.golden} />
+    </div>
+    <div class="col-12 col-md-6 col-xl-3 px-2">
+      <LinkList title="Fernie" links={data.fernie} />
+      <LinkList title="Kimberley" links={data.kimberley} />
+      <LinkList title="Revelstoke" links={data.revelstoke} />
+    </div>
+    <div class="col-12 col-md-6 col-xl-3 px-2">
+      <WebcamGrid webcams={data.webcams} />
+    </div>
+    <div class="col-12 col-md-6 col-xl-3 px-2">
+      <p class="text-secondary small mb-1">Pacesetter Pow</p>
+      <script type="text/javascript" src="//www.teleport.io/api/v2/player?feedid=fe1hfmbvezh2&playmode=liveimage&playframeskipinterval=min&playframecount=60&containeraspectratio=auto"></script>
+      {sidebarCams.map(cam => (
+        <div class="mb-3 position-relative">
+          <img src={cam.src} alt={cam.label} loading="lazy" class="webcam-img" />
+          <span class="webcam-label">{cam.group} — {cam.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</Layout>
