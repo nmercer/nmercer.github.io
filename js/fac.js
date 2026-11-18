@@ -116,7 +116,7 @@ function showFallback() {
   const el = document.getElementById('fac-forecast');
   if (el) {
     el.innerHTML =
-      '<a href="https://www.flatheadavalanche.org/forecasts" target="_blank" style="color:#aaa">FAC Forecast &rarr;</a>';
+      '<a href="https://www.flatheadavalanche.org/forecasts/" target="_blank" rel="noopener noreferrer" style="color:#aaa">FAC Forecast &rarr;</a>';
   }
 }
 
